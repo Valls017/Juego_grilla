@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Juego de la Grilla</h2>
+    <p id="estado">Turno TU</p>
+    
+    <div id="tablero"></div>
+    <br>
+    <button id="btn-reiniciar">Reiniciar Juego</button>
+
+    <script>
+        let grilla = JSON.parse(localStorage.getItem('juego')) || crearGrillaVacia();
+        let turno = "Jugador";
+
+        function crearGrillaVacia() {
+            return [
+                ["", "", "", ""],
+                ["", "", "", ""],
+                ["", "", "", ""],
+                ["", "", "", ""]
+            ];
+        }
+
+        function dibujarTablero() {
+            const tablero = document.getElementById("tablero");
+            tablero.innerHTML = "";
+
+            for (let f = 0; f < 4; f++) {
+                let filaDiv = document.createElement("div");
+                
+                for (let c = 0; c < 4; c++) {
+                    let boton = document.createElement("button");
+                    
+                    boton.style.width = "60px";
+                    boton.style.height = "60px";
+                    
+                    if (grilla[f][c] === "Naranja") boton.style.backgroundColor = "#D55E00";
+                    if (grilla[f][c] === "Negro") boton.style.backgroundColor = "black";
+
+                    boton.addEventListener("click", function() {
+                        jugar(f, c);
+                    });
+
+                    filaDiv.appendChild(boton);
+                }
+                tablero.appendChild(filaDiv);
+            }
+
+            localStorage.setItem('juego', JSON.stringify(grilla));
+        }
+
+        function jugar(f, c) {
+            if (turno !== "Jugador") return;
+
+            aplicarAreaDeEfecto(f, c, "Naranja");
+            
+            turno = "Maquina";
+            document.getElementById("estado").innerText = "Turno Maquina";
+            dibujarTablero();
+
+            setTimeout(juegaMaquina, 500);
+        }
+
+        function juegaMaquina() {
+            let f = Math.floor(Math.random() * 4);
+            let c = Math.floor(Math.random() * 4);
+            
+            aplicarAreaDeEfecto(f, c, "Negro");
+            
+            turno = "Jugador";
+            document.getElementById("estado").innerText = "Turno TU:";
+            dibujarTablero();
+        }
+
+        function aplicarAreaDeEfecto(f, c, color) {
+            const direcciones = [
+                [0, 0], [-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]
+            ];
+
+            direcciones.forEach(direccion => {
+                let nuevaFila = f + direccion[0];
+                let nuevaCol = c + direccion[1];
+                
+                if (nuevaFila >= 0 && nuevaFila < 4 && nuevaCol >= 0 && nuevaCol < 4) {
+                    grilla[nuevaFila][nuevaCol] = color;
+                }
+            });
+        }
+
+        document.getElementById("btn-reiniciar").addEventListener("click", function() {
+            grilla = crearGrillaVacia();
+            turno = "Jugador";
+            document.getElementById("estado").innerText = "Turno TU";
+            dibujarTablero();
+        });
+
+        dibujarTablero();
+    </script>
+</body>
+</html>
